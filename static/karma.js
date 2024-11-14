@@ -1,484 +1,537 @@
 (function () {
-  'use strict';
+	'use strict';
 
-  var main = {};
+	function getDefaultExportFromCjs (x) {
+		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+	}
 
-  var util$2 = {};
+	var main$1 = {};
 
-  (function (exports) {
-  	exports.instanceOf = function (value, constructorName) {
-  	  return Object.prototype.toString.apply(value) === '[object ' + constructorName + ']'
-  	};
+	var util = {};
 
-  	exports.elm = function (id) {
-  	  return document.getElementById(id)
-  	};
+	var hasRequiredUtil;
 
-  	exports.generateId = function (prefix) {
-  	  return prefix + Math.floor(Math.random() * 10000)
-  	};
+	function requireUtil () {
+		if (hasRequiredUtil) return util;
+		hasRequiredUtil = 1;
+		(function (exports) {
+			exports.instanceOf = function (value, constructorName) {
+			  return Object.prototype.toString.apply(value) === '[object ' + constructorName + ']'
+			};
 
-  	exports.isUndefined = function (value) {
-  	  return typeof value === 'undefined'
-  	};
+			exports.elm = function (id) {
+			  return document.getElementById(id)
+			};
 
-  	exports.isDefined = function (value) {
-  	  return !exports.isUndefined(value)
-  	}; 
-  } (util$2));
+			exports.generateId = function (prefix) {
+			  return prefix + Math.floor(Math.random() * 10000)
+			};
 
-  const instanceOf = util$2.instanceOf;
+			exports.isUndefined = function (value) {
+			  return typeof value === 'undefined'
+			};
 
-  function isNode (obj) {
-    return (obj.tagName || obj.nodeName) && obj.nodeType
-  }
+			exports.isDefined = function (value) {
+			  return !exports.isUndefined(value)
+			}; 
+		} (util));
+		return util;
+	}
 
-  function stringify$1 (obj, depth) {
-    if (depth === 0) {
-      return '...'
-    }
+	var stringify_1;
+	var hasRequiredStringify;
 
-    if (obj === null) {
-      return 'null'
-    }
+	function requireStringify () {
+		if (hasRequiredStringify) return stringify_1;
+		hasRequiredStringify = 1;
+		const instanceOf = requireUtil().instanceOf;
 
-    switch (typeof obj) {
-      case 'symbol':
-        return obj.toString()
-      case 'string':
-        return "'" + obj + "'"
-      case 'undefined':
-        return 'undefined'
-      case 'function':
-        try {
-          // function abc(a, b, c) { /* code goes here */ }
-          //   -> function abc(a, b, c) { ... }
-          return obj.toString().replace(/\{[\s\S]*\}/, '{ ... }')
-        } catch (err) {
-          if (err instanceof TypeError) {
-            // Support older browsers
-            return 'function ' + (obj.name || '') + '() { ... }'
-          } else {
-            throw err
-          }
-        }
-      case 'boolean':
-        return obj ? 'true' : 'false'
-      case 'object': {
-        const strs = [];
-        if (instanceOf(obj, 'Array')) {
-          strs.push('[');
-          for (let i = 0, ii = obj.length; i < ii; i++) {
-            if (i) {
-              strs.push(', ');
-            }
-            strs.push(stringify$1(obj[i], depth - 1));
-          }
-          strs.push(']');
-        } else if (instanceOf(obj, 'Date')) {
-          return obj.toString()
-        } else if (instanceOf(obj, 'Text')) {
-          return obj.nodeValue
-        } else if (instanceOf(obj, 'Comment')) {
-          return '<!--' + obj.nodeValue + '-->'
-        } else if (obj.outerHTML) {
-          return obj.outerHTML
-        } else if (isNode(obj)) {
-          return new window.XMLSerializer().serializeToString(obj)
-        } else if (instanceOf(obj, 'Error')) {
-          return obj.toString() + '\n' + obj.stack
-        } else {
-          let constructor = 'Object';
-          if (obj.constructor && typeof obj.constructor === 'function') {
-            constructor = obj.constructor.name;
-          }
+		function isNode (obj) {
+		  return (obj.tagName || obj.nodeName) && obj.nodeType
+		}
 
-          strs.push(constructor);
-          strs.push('{');
-          let first = true;
-          for (const key in obj) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) {
-              if (first) {
-                first = false;
-              } else {
-                strs.push(', ');
-              }
+		function stringify (obj, depth) {
+		  if (depth === 0) {
+		    return '...'
+		  }
 
-              strs.push(key + ': ' + stringify$1(obj[key], depth - 1));
-            }
-          }
-          strs.push('}');
-        }
-        return strs.join('')
-      }
-      default:
-        return obj
-    }
-  }
+		  if (obj === null) {
+		    return 'null'
+		  }
 
-  var stringify_1 = stringify$1;
+		  switch (typeof obj) {
+		    case 'symbol':
+		      return obj.toString()
+		    case 'string':
+		      return "'" + obj + "'"
+		    case 'undefined':
+		      return 'undefined'
+		    case 'function':
+		      try {
+		        // function abc(a, b, c) { /* code goes here */ }
+		        //   -> function abc(a, b, c) { ... }
+		        return obj.toString().replace(/\{[\s\S]*\}/, '{ ... }')
+		      } catch (err) {
+		        if (err instanceof TypeError) {
+		          // Support older browsers
+		          return 'function ' + (obj.name || '') + '() { ... }'
+		        } else {
+		          throw err
+		        }
+		      }
+		    case 'boolean':
+		      return obj ? 'true' : 'false'
+		    case 'object': {
+		      const strs = [];
+		      if (instanceOf(obj, 'Array')) {
+		        strs.push('[');
+		        for (let i = 0, ii = obj.length; i < ii; i++) {
+		          if (i) {
+		            strs.push(', ');
+		          }
+		          strs.push(stringify(obj[i], depth - 1));
+		        }
+		        strs.push(']');
+		      } else if (instanceOf(obj, 'Date')) {
+		        return obj.toString()
+		      } else if (instanceOf(obj, 'Text')) {
+		        return obj.nodeValue
+		      } else if (instanceOf(obj, 'Comment')) {
+		        return '<!--' + obj.nodeValue + '-->'
+		      } else if (obj.outerHTML) {
+		        return obj.outerHTML
+		      } else if (isNode(obj)) {
+		        return new window.XMLSerializer().serializeToString(obj)
+		      } else if (instanceOf(obj, 'Error')) {
+		        return obj.toString() + '\n' + obj.stack
+		      } else {
+		        let constructor = 'Object';
+		        if (obj.constructor && typeof obj.constructor === 'function') {
+		          constructor = obj.constructor.name;
+		        }
 
-  var constants$1 = {
-    VERSION: '%KARMA_VERSION%',
-    KARMA_URL_ROOT: '%KARMA_URL_ROOT%',
-    KARMA_PROXY_PATH: '%KARMA_PROXY_PATH%',
-    BROWSER_SOCKET_TIMEOUT: '%BROWSER_SOCKET_TIMEOUT%',
-    CONTEXT_URL: 'context.html'
-  };
+		        strs.push(constructor);
+		        strs.push('{');
+		        let first = true;
+		        for (const key in obj) {
+		          if (Object.prototype.hasOwnProperty.call(obj, key)) {
+		            if (first) {
+		              first = false;
+		            } else {
+		              strs.push(', ');
+		            }
 
-  const stringify = stringify_1;
-  const constant = constants$1;
-  const util$1 = util$2;
+		            strs.push(key + ': ' + stringify(obj[key], depth - 1));
+		          }
+		        }
+		        strs.push('}');
+		      }
+		      return strs.join('')
+		    }
+		    default:
+		      return obj
+		  }
+		}
 
-  function Karma$1 (updater, socket, iframe, opener, navigator, location, document) {
-    this.updater = updater;
-    let startEmitted = false;
-    const queryParams = new URLSearchParams(location.search);
-    const browserId = queryParams.get('id') || util$1.generateId('manual-');
-    const displayName = queryParams.get('displayName');
-    const returnUrl = queryParams.get('return_url');
+		stringify_1 = stringify;
+		return stringify_1;
+	}
 
-    // This is a no-op if not running with a Trusted Types CSP policy, and
-    // lets tests declare that they trust the way that karma creates and handles
-    // URLs.
-    //
-    // More info about the proposed Trusted Types standard at
-    // https://github.com/WICG/trusted-types
-    let policy = {
-      createURL (s) {
-        return s
-      },
-      createScriptURL (s) {
-        return s
-      }
-    };
-    const trustedTypes = window.trustedTypes || window.TrustedTypes;
-    if (trustedTypes) {
-      policy = trustedTypes.createPolicy('karma', policy);
-      if (!policy.createURL) {
-        // Install createURL for newer browsers. Only browsers that implement an
-        //     old version of the spec require createURL.
-        //     Should be safe to delete all reference to createURL by
-        //     February 2020.
-        // https://github.com/WICG/trusted-types/pull/204
-        policy.createURL = function (s) { return s };
-      }
-    }
+	var constants;
+	var hasRequiredConstants;
 
-    this.VERSION = constant.VERSION;
-    this.config = {};
+	function requireConstants () {
+		if (hasRequiredConstants) return constants;
+		hasRequiredConstants = 1;
+		constants = {
+		  VERSION: '%KARMA_VERSION%',
+		  KARMA_URL_ROOT: '%KARMA_URL_ROOT%',
+		  KARMA_PROXY_PATH: '%KARMA_PROXY_PATH%',
+		  BROWSER_SOCKET_TIMEOUT: '%BROWSER_SOCKET_TIMEOUT%',
+		  CONTEXT_URL: 'context.html'
+		};
+		return constants;
+	}
 
-    // Expose for testing purposes as there is no global socket.io
-    // registry anymore.
-    this.socket = socket;
+	var karma;
+	var hasRequiredKarma;
 
-    // Set up postMessage bindings for current window
-    // DEV: These are to allow windows in separate processes execute local tasks
-    //   Electron is one of these environments
-    window.addEventListener('message', (evt) => {
-      // Resolve the origin of our message
-      const origin = evt.origin || evt.originalEvent.origin;
+	function requireKarma () {
+		if (hasRequiredKarma) return karma;
+		hasRequiredKarma = 1;
+		const stringify = requireStringify();
+		const constant = requireConstants();
+		const util = requireUtil();
 
-      // If the message isn't from our host, then reject it
-      if (origin !== window.location.origin) {
-        return
-      }
+		function Karma (updater, socket, iframe, opener, navigator, location, document) {
+		  this.updater = updater;
+		  let startEmitted = false;
+		  const queryParams = new URLSearchParams(location.search);
+		  const browserId = queryParams.get('id') || util.generateId('manual-');
+		  const displayName = queryParams.get('displayName');
+		  const returnUrl = queryParams.get('return_url');
 
-      // Take action based on the message type
-      const method = evt.data.__karmaMethod;
-      if (method) {
-        if (!this[method]) {
-          this.error('Received `postMessage` for "' + method + '" but the method doesn\'t exist');
-          return
-        }
-        this[method].apply(this, evt.data.__karmaArguments);
-      }
-    }, false);
+		  // This is a no-op if not running with a Trusted Types CSP policy, and
+		  // lets tests declare that they trust the way that karma creates and handles
+		  // URLs.
+		  //
+		  // More info about the proposed Trusted Types standard at
+		  // https://github.com/WICG/trusted-types
+		  let policy = {
+		    createURL (s) {
+		      return s
+		    },
+		    createScriptURL (s) {
+		      return s
+		    }
+		  };
+		  const trustedTypes = window.trustedTypes || window.TrustedTypes;
+		  if (trustedTypes) {
+		    policy = trustedTypes.createPolicy('karma', policy);
+		    if (!policy.createURL) {
+		      // Install createURL for newer browsers. Only browsers that implement an
+		      //     old version of the spec require createURL.
+		      //     Should be safe to delete all reference to createURL by
+		      //     February 2020.
+		      // https://github.com/WICG/trusted-types/pull/204
+		      policy.createURL = function (s) { return s };
+		    }
+		  }
 
-    let childWindow = null;
-    const navigateContextTo = (url) => {
-      if (this.config.useIframe === false) {
-        // run in new window
-        if (this.config.runInParent === false) {
-          // If there is a window already open, then close it
-          // DEV: In some environments (e.g. Electron), we don't have setter access for location
-          if (childWindow !== null && childWindow.closed !== true) {
-            // The onbeforeunload listener was added by context to catch
-            // unexpected navigations while running tests.
-            childWindow.onbeforeunload = undefined;
-            childWindow.close();
-          }
-          childWindow = opener(url);
-          if (childWindow === null) {
-            this.error('Opening a new tab/window failed, probably because pop-ups are blocked.');
-          }
-        // run context on parent element (client_with_context)
-        // using window.__karma__.scriptUrls to get the html element strings and load them dynamically
-        } else if (url !== 'about:blank') {
-          const loadScript = function (idx) {
-            if (idx < window.__karma__.scriptUrls.length) {
-              const parser = new DOMParser();
-              // Revert escaped characters with special roles in HTML before parsing
-              const string = window.__karma__.scriptUrls[idx]
-                .replace(/\\x3C/g, '<')
-                .replace(/\\x3E/g, '>');
-              const doc = parser.parseFromString(string, 'text/html');
-              let ele = doc.head.firstChild || doc.body.firstChild;
-              // script elements created by DomParser are marked as unexecutable,
-              // create a new script element manually and copy necessary properties
-              // so it is executable
-              if (ele.tagName && ele.tagName.toLowerCase() === 'script') {
-                const tmp = ele;
-                ele = document.createElement('script');
-                ele.src = policy.createScriptURL(tmp.src);
-                ele.crossOrigin = tmp.crossOrigin;
-              }
-              ele.onload = function () {
-                loadScript(idx + 1);
-              };
-              document.body.appendChild(ele);
-            } else {
-              window.__karma__.loaded();
-            }
-          };
-          loadScript(0);
-        }
-      // run in iframe
-      } else {
-        // The onbeforeunload listener was added by the context to catch
-        // unexpected navigations while running tests.
-        iframe.contentWindow.onbeforeunload = undefined;
-        iframe.src = policy.createURL(url);
-      }
-    };
+		  this.VERSION = constant.VERSION;
+		  this.config = {};
 
-    this.log = function (type, args) {
-      const values = args.map((v) => this.stringify(v, 3));
-      this.info({ log: values.join(', '), type });
-    };
+		  // Expose for testing purposes as there is no global socket.io
+		  // registry anymore.
+		  this.socket = socket;
 
-    this.stringify = stringify;
+		  // Set up postMessage bindings for current window
+		  // DEV: These are to allow windows in separate processes execute local tasks
+		  //   Electron is one of these environments
+		  window.addEventListener('message', (evt) => {
+		    // Resolve the origin of our message
+		    const origin = evt.origin || evt.originalEvent.origin;
 
-    function getLocation (url, lineno, colno) {
-      let location = '';
+		    // If the message isn't from our host, then reject it
+		    if (origin !== window.location.origin) {
+		      return
+		    }
 
-      if (url !== undefined) {
-        location += url;
-      }
+		    // Take action based on the message type
+		    const method = evt.data.__karmaMethod;
+		    if (method) {
+		      if (!this[method]) {
+		        this.error('Received `postMessage` for "' + method + '" but the method doesn\'t exist');
+		        return
+		      }
+		      this[method].apply(this, evt.data.__karmaArguments);
+		    }
+		  }, false);
 
-      if (lineno !== undefined) {
-        location += ':' + lineno;
-      }
+		  let childWindow = null;
+		  const navigateContextTo = (url) => {
+		    if (this.config.useIframe === false) {
+		      // run in new window
+		      if (this.config.runInParent === false) {
+		        // If there is a window already open, then close it
+		        // DEV: In some environments (e.g. Electron), we don't have setter access for location
+		        if (childWindow !== null && childWindow.closed !== true) {
+		          // The onbeforeunload listener was added by context to catch
+		          // unexpected navigations while running tests.
+		          childWindow.onbeforeunload = undefined;
+		          childWindow.close();
+		        }
+		        childWindow = opener(url);
+		        if (childWindow === null) {
+		          this.error('Opening a new tab/window failed, probably because pop-ups are blocked.');
+		        }
+		      // run context on parent element (client_with_context)
+		      // using window.__karma__.scriptUrls to get the html element strings and load them dynamically
+		      } else if (url !== 'about:blank') {
+		        const loadScript = function (idx) {
+		          if (idx < window.__karma__.scriptUrls.length) {
+		            const parser = new DOMParser();
+		            // Revert escaped characters with special roles in HTML before parsing
+		            const string = window.__karma__.scriptUrls[idx]
+		              .replace(/\\x3C/g, '<')
+		              .replace(/\\x3E/g, '>');
+		            const doc = parser.parseFromString(string, 'text/html');
+		            let ele = doc.head.firstChild || doc.body.firstChild;
+		            // script elements created by DomParser are marked as unexecutable,
+		            // create a new script element manually and copy necessary properties
+		            // so it is executable
+		            if (ele.tagName && ele.tagName.toLowerCase() === 'script') {
+		              const tmp = ele;
+		              ele = document.createElement('script');
+		              ele.src = policy.createScriptURL(tmp.src);
+		              ele.crossOrigin = tmp.crossOrigin;
+		            }
+		            ele.onload = function () {
+		              loadScript(idx + 1);
+		            };
+		            document.body.appendChild(ele);
+		          } else {
+		            window.__karma__.loaded();
+		          }
+		        };
+		        loadScript(0);
+		      }
+		    // run in iframe
+		    } else {
+		      // The onbeforeunload listener was added by the context to catch
+		      // unexpected navigations while running tests.
+		      iframe.contentWindow.onbeforeunload = undefined;
+		      iframe.src = policy.createURL(url);
+		    }
+		  };
 
-      if (colno !== undefined) {
-        location += ':' + colno;
-      }
+		  this.log = function (type, args) {
+		    const values = args.map((v) => this.stringify(v, 3));
+		    this.info({ log: values.join(', '), type });
+		  };
 
-      return location
-    }
+		  this.stringify = stringify;
 
-    // error during js file loading (most likely syntax error)
-    // we are not going to execute at all. `window.onerror` callback.
-    this.error = function (messageOrEvent, source, lineno, colno, error) {
-      let message;
-      if (typeof messageOrEvent === 'string') {
-        message = messageOrEvent;
+		  function getLocation (url, lineno, colno) {
+		    let location = '';
 
-        const location = getLocation(source, lineno, colno);
-        if (location !== '') {
-          message += '\nat ' + location;
-        }
-        if (error && error.stack) {
-          message += '\n\n' + error.stack;
-        }
-      } else if (messageOrEvent?.type === 'unhandledrejection') {
-        message = messageOrEvent.reason.message;
-        if (messageOrEvent.reason.stack) {
-          message += '\n\n' + messageOrEvent.reason.stack;
-        }
-      } else {
-        // create an object with the string representation of the message to
-        // ensure all its content is properly transferred to the console log
-        message = { message: messageOrEvent, str: messageOrEvent.toString() };
-      }
+		    if (url !== undefined) {
+		      location += url;
+		    }
 
-      socket.emit('karma_error', message);
-      this.updater.updateTestStatus('karma_error ' + message);
-      this.complete();
-      return false
-    };
+		    if (lineno !== undefined) {
+		      location += ':' + lineno;
+		    }
 
-    this.result = function (originalResult) {
-      const convertedResult = {};
+		    if (colno !== undefined) {
+		      location += ':' + colno;
+		    }
 
-      // Convert all array-like objects to real arrays.
-      for (const propertyName in originalResult) {
-        if (Object.hasOwn(originalResult, propertyName)) {
-          const propertyValue = originalResult[propertyName];
+		    return location
+		  }
 
-          if (Array.isArray(propertyValue)) {
-            convertedResult[propertyName] = [...propertyValue];
-          } else {
-            convertedResult[propertyName] = propertyValue;
-          }
-        }
-      }
+		  // error during js file loading (most likely syntax error)
+		  // we are not going to execute at all. `window.onerror` callback.
+		  this.error = function (messageOrEvent, source, lineno, colno, error) {
+		    let message;
+		    if (typeof messageOrEvent === 'string') {
+		      message = messageOrEvent;
 
-      if (!startEmitted) {
-        socket.emit('start', { total: null });
-        this.updater.updateTestStatus('start');
-        startEmitted = true;
-      }
+		      const location = getLocation(source, lineno, colno);
+		      if (location !== '') {
+		        message += '\nat ' + location;
+		      }
+		      if (error && error.stack) {
+		        message += '\n\n' + error.stack;
+		      }
+		    } else if (messageOrEvent?.type === 'unhandledrejection') {
+		      message = messageOrEvent.reason.message;
+		      if (messageOrEvent.reason.stack) {
+		        message += '\n\n' + messageOrEvent.reason.stack;
+		      }
+		    } else {
+		      // create an object with the string representation of the message to
+		      // ensure all its content is properly transferred to the console log
+		      message = { message: messageOrEvent, str: messageOrEvent.toString() };
+		    }
 
-      this.updater.updateTestStatus('result');
-      return socket.emit('result', convertedResult)
-    };
+		    socket.emit('karma_error', message);
+		    this.updater.updateTestStatus('karma_error ' + message);
+		    this.complete();
+		    return false
+		  };
 
-    this.complete = function (result) {
-      socket.emit('complete', result || {});
-      if (this.config.clearContext) {
-        navigateContextTo('about:blank');
-      } else {
-        this.updater.updateTestStatus('complete');
-      }
-      if (returnUrl) {
-        let isReturnUrlAllowed = false;
-        for (let i = 0; i < this.config.allowedReturnUrlPatterns.length; i++) {
-          const allowedReturnUrlPattern = new RegExp(this.config.allowedReturnUrlPatterns[i]);
-          if (allowedReturnUrlPattern.test(returnUrl)) {
-            isReturnUrlAllowed = true;
-            break
-          }
-        }
-        if (!isReturnUrlAllowed) {
-          throw new Error(
-            'Security: Navigation to '.concat(
-              returnUrl,
-              ' was blocked to prevent malicious exploits.'
-            )
-          )
-        }
-        location.href = returnUrl;
-      }
-    };
+		  this.result = function (originalResult) {
+		    const convertedResult = {};
 
-    this.info = function (info) {
-      // TODO(vojta): introduce special API for this
-      if (!startEmitted && util$1.isDefined(info.total)) {
-        socket.emit('start', info);
-        startEmitted = true;
-      } else {
-        socket.emit('info', info);
-      }
-    };
+		    // Convert all array-like objects to real arrays.
+		    for (const propertyName in originalResult) {
+		      if (Object.hasOwn(originalResult, propertyName)) {
+		        const propertyValue = originalResult[propertyName];
 
-    socket.addEventListener('message', (evt) => {
-      const [type, cfg] = JSON.parse(evt.data);
-      if (type === 'stop') {
-        this.complete();
-      } else if (type === 'execute') {
-        this.updater.updateTestStatus('execute');
-        // reset startEmitted and reload the iframe
-        startEmitted = false;
-        this.config = cfg;
+		        if (Array.isArray(propertyValue)) {
+		          convertedResult[propertyName] = [...propertyValue];
+		        } else {
+		          convertedResult[propertyName] = propertyValue;
+		        }
+		      }
+		    }
 
-        navigateContextTo(constant.CONTEXT_URL);
+		    if (!startEmitted) {
+		      socket.emit('start', { total: null });
+		      this.updater.updateTestStatus('start');
+		      startEmitted = true;
+		    }
 
-        if (this.config.clientDisplayNone) {
-          document.querySelectorAll('#banner, #browsers').forEach((el) => (el.hidden = true));
-        }
-        // clear the console before run
-        window.console.clear();
-      }
-    });
+		    this.updater.updateTestStatus('result');
+		    return socket.emit('result', convertedResult)
+		  };
 
-    // Report the browser name and Id.
-    socket.addEventListener('open', () => {
-      const info = {
-        name: navigator.userAgent,
-        id: browserId
-      };
-      if (displayName) {
-        info.displayName = displayName;
-      }
-      socket.emit('register', info);
-    });
-  }
+		  this.complete = function (result) {
+		    socket.emit('complete', result || {});
+		    if (this.config.clearContext) {
+		      navigateContextTo('about:blank');
+		    } else {
+		      this.updater.updateTestStatus('complete');
+		    }
+		    if (returnUrl) {
+		      let isReturnUrlAllowed = false;
+		      for (let i = 0; i < this.config.allowedReturnUrlPatterns.length; i++) {
+		        const allowedReturnUrlPattern = new RegExp(this.config.allowedReturnUrlPatterns[i]);
+		        if (allowedReturnUrlPattern.test(returnUrl)) {
+		          isReturnUrlAllowed = true;
+		          break
+		        }
+		      }
+		      if (!isReturnUrlAllowed) {
+		        throw new Error(
+		          'Security: Navigation to '.concat(
+		            returnUrl,
+		            ' was blocked to prevent malicious exploits.'
+		          )
+		        )
+		      }
+		      location.href = returnUrl;
+		    }
+		  };
 
-  var karma = Karma$1;
+		  this.info = function (info) {
+		    // TODO(vojta): introduce special API for this
+		    if (!startEmitted && util.isDefined(info.total)) {
+		      socket.emit('start', info);
+		      startEmitted = true;
+		    } else {
+		      socket.emit('info', info);
+		    }
+		  };
 
-  const VERSION = constants$1.VERSION;
+		  socket.addEventListener('message', (evt) => {
+		    const [type, cfg] = JSON.parse(evt.data);
+		    if (type === 'stop') {
+		      this.complete();
+		    } else if (type === 'execute') {
+		      this.updater.updateTestStatus('execute');
+		      // reset startEmitted and reload the iframe
+		      startEmitted = false;
+		      this.config = cfg;
 
-  function StatusUpdater$1 (socket, titleElement, bannerElement, browsersElement) {
-    function updateBrowsersInfo (browsers) {
-      if (!browsersElement) {
-        return
-      }
-      const elems = browsers.map(({ isConnected, name }) => {
-        const status = isConnected ? 'idle' : 'executing';
-        const li = document.createElement('li');
-        li.className = status;
-        li.textContent = `${name} is ${status}`;
-        return li
-      });
-      browsersElement.replaceChildren(...elems);
-    }
+		      navigateContextTo(constant.CONTEXT_URL);
 
-    let connectionText = 'never-connected';
-    let testText = 'loading';
+		      if (this.config.clientDisplayNone) {
+		        document.querySelectorAll('#banner, #browsers').forEach((el) => (el.hidden = true));
+		      }
+		      // clear the console before run
+		      window.console.clear();
+		    }
+		  });
 
-    function updateBanner () {
-      if (!titleElement || !bannerElement) {
-        return
-      }
-      titleElement.textContent = `Karma v ${VERSION} - ${connectionText}; test: ${testText};`;
-      bannerElement.className = connectionText === 'connected' ? 'online' : 'offline';
-    }
+		  // Report the browser name and Id.
+		  socket.addEventListener('open', () => {
+		    const info = {
+		      name: navigator.userAgent,
+		      id: browserId
+		    };
+		    if (displayName) {
+		      info.displayName = displayName;
+		    }
+		    socket.emit('register', info);
+		  });
+		}
 
-    function updateConnectionStatus (connectionStatus) {
-      connectionText = connectionStatus || connectionText;
-      updateBanner();
-    }
-    function updateTestStatus (testStatus) {
-      testText = testStatus || testText;
-      updateBanner();
-    }
+		karma = Karma;
+		return karma;
+	}
 
-    socket.addEventListener('open', () => updateConnectionStatus('connected'));
-    socket.addEventListener('close', () => updateConnectionStatus('disconnected'));
-    socket.addEventListener('message', (event) => {
-      const [type, value] = JSON.parse(event.data);
-      if (type === 'info') {
-        updateBrowsersInfo(value);
-      }
-    });
+	var updater;
+	var hasRequiredUpdater;
 
-    return { updateTestStatus }
-  }
+	function requireUpdater () {
+		if (hasRequiredUpdater) return updater;
+		hasRequiredUpdater = 1;
+		const VERSION = requireConstants().VERSION;
 
-  var updater$1 = StatusUpdater$1;
+		function StatusUpdater (socket, titleElement, bannerElement, browsersElement) {
+		  function updateBrowsersInfo (browsers) {
+		    if (!browsersElement) {
+		      return
+		    }
+		    const elems = browsers.map(({ isConnected, name }) => {
+		      const status = isConnected ? 'idle' : 'executing';
+		      const li = document.createElement('li');
+		      li.className = status;
+		      li.textContent = `${name} is ${status}`;
+		      return li
+		    });
+		    browsersElement.replaceChildren(...elems);
+		  }
 
-  /* eslint-disable no-new */
+		  let connectionText = 'never-connected';
+		  let testText = 'loading';
 
-  const Karma = karma;
-  const StatusUpdater = updater$1;
-  const util = util$2;
-  const constants = constants$1;
+		  function updateBanner () {
+		    if (!titleElement || !bannerElement) {
+		      return
+		    }
+		    titleElement.textContent = `Karma v ${VERSION} - ${connectionText}; test: ${testText};`;
+		    bannerElement.className = connectionText === 'connected' ? 'online' : 'offline';
+		  }
 
-  const KARMA_URL_ROOT = constants.KARMA_URL_ROOT;
-  const KARMA_PROXY_PATH = constants.KARMA_PROXY_PATH;
+		  function updateConnectionStatus (connectionStatus) {
+		    connectionText = connectionStatus || connectionText;
+		    updateBanner();
+		  }
+		  function updateTestStatus (testStatus) {
+		    testText = testStatus || testText;
+		    updateBanner();
+		  }
 
-  const socket = new WebSocket('ws://' + location.host + KARMA_PROXY_PATH + KARMA_URL_ROOT.slice(1));
-  window.addEventListener('beforeunload', () => socket.close());
-  socket.emit = function (event, data) {
-    this.send(JSON.stringify([event, data]));
-  };
+		  socket.addEventListener('open', () => updateConnectionStatus('connected'));
+		  socket.addEventListener('close', () => updateConnectionStatus('disconnected'));
+		  socket.addEventListener('message', (event) => {
+		    const [type, value] = JSON.parse(event.data);
+		    if (type === 'info') {
+		      updateBrowsersInfo(value);
+		    }
+		  });
 
-  // instantiate the updater of the view
-  const updater = new StatusUpdater(socket, util.elm('title'), util.elm('banner'), util.elm('browsers'));
-  window.karma = new Karma(updater, socket, util.elm('context'), window.open,
-    window.navigator, window.location, window.document);
+		  return { updateTestStatus }
+		}
 
-  return main;
+		updater = StatusUpdater;
+		return updater;
+	}
+
+	/* eslint-disable no-new */
+
+	var hasRequiredMain;
+
+	function requireMain () {
+		if (hasRequiredMain) return main$1;
+		hasRequiredMain = 1;
+		const Karma = requireKarma();
+		const StatusUpdater = requireUpdater();
+		const util = requireUtil();
+		const constants = requireConstants();
+
+		const KARMA_URL_ROOT = constants.KARMA_URL_ROOT;
+		const KARMA_PROXY_PATH = constants.KARMA_PROXY_PATH;
+
+		const socket = new WebSocket('ws://' + location.host + KARMA_PROXY_PATH + KARMA_URL_ROOT.slice(1));
+		window.addEventListener('beforeunload', () => socket.close());
+		socket.emit = function (event, data) {
+		  this.send(JSON.stringify([event, data]));
+		};
+
+		// instantiate the updater of the view
+		const updater = new StatusUpdater(socket, util.elm('title'), util.elm('banner'), util.elm('browsers'));
+		window.karma = new Karma(updater, socket, util.elm('context'), window.open,
+		  window.navigator, window.location, window.document);
+		return main$1;
+	}
+
+	var mainExports = requireMain();
+	var main = /*@__PURE__*/getDefaultExportFromCjs(mainExports);
+
+	return main;
 
 })();

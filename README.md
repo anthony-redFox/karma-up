@@ -1,5 +1,5 @@
 # Karma
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/karma-runner/karma) [![npm version](https://img.shields.io/npm/v/karma.svg?style=flat-square)](https://www.npmjs.com/package/karma) [![npm downloads](https://img.shields.io/npm/dm/karma.svg?style=flat-square)](https://npmcharts.com/compare/karma?minimal=true)
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/Second-Live/karma-up) [![npm version](https://img.shields.io/npm/v/karma-up.svg?style=flat-square)](https://www.npmjs.com/package/karma-up) [![npm downloads](https://img.shields.io/npm/dm/karma-up.svg?style=flat-square)](https://npmcharts.com/compare/karma-up?minimal=true)
 
  [![Code Climate](https://img.shields.io/codeclimate/maintainability/karma-runner/karma)](https://codeclimate.com/github/karma-runner/karma) [![PRs Welcome](https://img.shields.io/badge/prs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com/) [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
